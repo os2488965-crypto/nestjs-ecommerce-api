@@ -13,14 +13,22 @@ import { Observable } from 'rxjs';
 import { TokenService } from '../service';
 import { TokenTypeEnum } from '../enums';
 import { tokenType } from '../middleware';
+import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
-  constructor(private readonly tokenService: TokenService) {}
+  constructor(
+    private readonly tokenService: TokenService,
+    private reflector: Reflector,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     let req: any;
     let authorization: string = '';
+    const typetoken = this.reflector.get<TokenTypeEnum>(
+      'TypeToken',
+      context.getHandler(),
+    );
 
     if (context.getType() === 'http') {
       req = context.switchToHttp().getRequest();
@@ -37,10 +45,7 @@ export class AuthenticationGuard implements CanActivate {
         throw new BadRequestException('Token not found');
       }
 
-      const signature = await this.tokenService.Getsignature(
-        TokenTypeEnum.access,
-        prefix,
-      );
+      const signature = await this.tokenService.Getsignature(typetoken, prefix);
       if (!signature) {
         throw new BadRequestException('Invalid Signature');
       }

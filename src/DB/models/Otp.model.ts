@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+/* eslint-disable prettier/prettier */
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import { OtpTypeEnum } from 'src/common/enums';
 import { eventEmitter } from 'src/common/utils';
@@ -24,10 +25,8 @@ export class Otp {
 export type HOtpDocument = HydratedDocument<Otp>;
 export const OtpSchema = SchemaFactory.createForClass(Otp);
 
-// auto delete expired otps
 OtpSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
 
-// pre-save hook to hash otp code
 OtpSchema.pre(
   'save',
   async function (
@@ -38,18 +37,12 @@ OtpSchema.pre(
       this.plainCode = this.code;
       this.is_new = this.isNew;
       this.code = GenerateHash({ plainText: this.code });
-      await this.populate([
-        {
-          path: 'createdBy',
-          select: 'email',
-        },
-      ]);
+      await this.populate([{ path: 'createdBy', select: 'email' }]);
     }
     next();
   },
 );
 
-// post-save hook to emit otp event
 OtpSchema.post('save', function (doc, next) {
   const that = this as HOtpDocument & { is_new: boolean; plainCode: string };
   if (that.is_new) {
@@ -60,11 +53,3 @@ OtpSchema.post('save', function (doc, next) {
   }
   next();
 });
-
-// export mongoose model
-export const OtpModel = MongooseModule.forFeature([
-  {
-    name: Otp.name,
-    schema: OtpSchema,
-  },
-]);

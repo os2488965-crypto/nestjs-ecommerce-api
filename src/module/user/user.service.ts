@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
@@ -10,12 +7,14 @@ import {
   Options,
 } from '@nestjs/common';
 import { OtpTypeEnum, RoleEnum, UserGender } from 'src/common/enums';
-import { OtpRepo, UserRepo } from 'src/DB';
 import { confirmEmailDto, loginDto, reSendOtpDto, signupDto } from './user.dto';
 import { emailTemplate, generateOTP, sendEmail } from 'src/common/service';
 import { Types } from 'mongoose';
 import { CompareHash } from 'src/common/utils/generate-hash';
 import { TokenService } from 'src/common/service/token.service';
+import { Otp, otpRepo, UserRepo } from 'src/DB';
+import { sign } from 'jsonwebtoken';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
@@ -25,8 +24,9 @@ export class UserService {
   // }
   constructor(
     private readonly userRepo: UserRepo,
-    private readonly otpRepo: OtpRepo,
+    private readonly otpRepo: otpRepo,
     private tokenService: TokenService,
+    private readonly jwtService: JwtService,
   ) {}
   private async sendOtp(userId: Types.ObjectId) {
     const otp = generateOTP();
@@ -156,7 +156,7 @@ export class UserService {
       },
     });
 
-    const refresh_token = await this.JwtService.signAsync(
+    const refresh_token = await this.jwtService.signAsync(
       { userId: user._id },
       {
         secret:

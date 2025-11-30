@@ -1,15 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 import { RoleEnum } from 'src/common/enums/role.enum';
-import {
-  MongooseModule,
-  Prop,
-  Schema,
-  SchemaFactory,
-  Virtual,
-} from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { Prop, Schema, SchemaFactory, Virtual } from '@nestjs/mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { UserGender, UserProvider } from 'src/common/enums';
-import type { HOtpDocument } from './Otp.model';
+import { HOtpDocument } from './otp.model';
 
 @Schema({
   timestamps: true,
@@ -18,7 +14,6 @@ import type { HOtpDocument } from './Otp.model';
   strictQuery: true,
 })
 export class User {
-  name: string;
   @Prop({
     type: String,
     required: true,
@@ -42,7 +37,6 @@ export class User {
 
   @Virtual({
     get() {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       return `${this.fName} ${this.lName}`;
     },
   })
@@ -66,21 +60,21 @@ export class User {
   @Prop({ type: Boolean, default: false })
   confirmed: boolean;
 
-  // @Prop({ type: String, enum: UserRole, default: UserRole.USER })
-  // role: UserRole;
   @Prop({ type: String, enum: RoleEnum, default: RoleEnum.USER })
   role: RoleEnum;
+
   @Prop({ type: String, enum: UserGender, default: UserGender.MALE })
   gender: UserGender;
 
   @Prop({ type: String, enum: UserProvider, default: UserProvider.LOCAL })
   provider: UserProvider;
-
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Product' }] })
+  wishList: Types.ObjectId[];
   @Prop({ type: Date, default: Date.now })
   changeCredentialAt: Date;
 
   @Virtual()
-  Otp: HOtpDocument;
+  Otp: HOtpDocument[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
@@ -104,9 +98,4 @@ UserSchema.pre('save', function (next) {
 });
 
 export type HUserDocument = HydratedDocument<User>;
-export const UserModel = MongooseModule.forFeatureAsync([
-  {
-    name: User.name,
-    useFactory: () => UserSchema,
-  },
-]);
+export type userDocument = HydratedDocument<User>;

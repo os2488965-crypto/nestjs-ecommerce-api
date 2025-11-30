@@ -5,8 +5,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtPayload, SignOptions } from 'jsonwebtoken';
 import { JwtService, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
 import { TokenTypeEnum } from '../enums/token.enum';
-import { UserRepo } from '../../DB/repo/user.repo';
 import { Types } from 'mongoose';
+import { UserRepo } from 'src/DB';
 
 @Injectable()
 export class TokenService {

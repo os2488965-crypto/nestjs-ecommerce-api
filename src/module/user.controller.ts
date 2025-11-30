@@ -5,7 +5,8 @@ import {
   Patch,
   Post,
   Request,
-  UseGuards,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user/user.service';
 import {
@@ -15,7 +16,10 @@ import {
   signupDto,
 } from './user/user.dto';
 import type { UserWithRequest } from 'src/common/interfaces';
-import { AuthenticationGuard } from 'src/common/guards';
+import { Auth } from 'src/common/decorators';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerLocal } from 'src/common/utils/multer';
+
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -40,9 +44,19 @@ export class UserController {
     // return { body, query };
     return this.userService.login(body);
   }
-  @UseGuards(AuthenticationGuard)
+  @Auth()
   @Get('profile')
   profile(@Request() req: UserWithRequest) {
     return { message: 'profile', user: req.user };
+  }
+  @Post('upload')
+  @UseInterceptors(
+    FileInterceptor(
+      'attachment',
+      multerLocal({ fileTypes: ['image/jpeg', 'image/png'] }),
+    ),
+  )
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
+    return { message: 'done', file };
   }
 }
