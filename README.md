@@ -113,41 +113,6 @@ This project provides secure authentication, product management, shopping cart, 
 
 ---
 
-# 🏗 Architecture
-
-The project follows a modular architecture provided by NestJS.
-
-```
-src
-│
-├── common
-│   ├── decorators
-│   ├── enums
-│   ├── guards
-│   ├── interfaces
-│   ├── middleware
-│   ├── pipes
-│   ├── service
-│   └── utils
-│
-├── DB
-│
-├── module
-│   ├── user
-│   ├── product
-│   ├── category
-│   ├── brand
-│   ├── cart
-│   ├── coupon
-│   ├── order
-│   └── gateway
-│
-├── app.module.ts
-└── main.ts
-```
-
----
-
 # 🛠 Tech Stack
 
 ### Backend
